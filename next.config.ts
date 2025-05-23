@@ -9,7 +9,7 @@ const nextConfig: NextConfig = {
         pathname: "/img/books/**",
       },
     ],
-    domains: ["cdn-icons-png.flaticon.com"],
+    domains: ["cdn-icons-png.flaticon.com", "localhost"],
   }
   /* config options here */
 };
