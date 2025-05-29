@@ -3,7 +3,6 @@ import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Search,
-  User,
   ChevronDown,
   ShoppingBasket,
   SunIcon,
@@ -19,8 +18,13 @@ export default function Navbar() {
   const [dropdownOpen, setDropdownOpen] = useState<"books" | null>(null);
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const [filteredBooks, setFilteredBooks] = useState([]);
-  const [user, setUser] = useState<any>(null); // Set user as any type
+  const [filteredBooks, setFilteredBooks] = useState<Book[]>([]);
+  interface User {
+    name: string;
+    role?: string;
+    // Add other user properties as needed
+  }
+  const [user, setUser] = useState<User | null>(null); // Set user as User type or null
   const dropdownRef = useRef(null);
 
   useEffect(() => {
@@ -48,7 +52,15 @@ export default function Navbar() {
     }
   };
 
-  const handleSearch = (event) => {
+  interface Book {
+    id: string | number;
+    title: string;
+    author: string;
+    image: string;
+    genres: string[];
+  }
+
+  const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
     const query = event.target.value.toLowerCase();
     setSearchQuery(query);
 
@@ -57,7 +69,7 @@ export default function Navbar() {
       return;
     }
 
-    const results = Books.filter(
+    const results = (Books as Book[]).filter(
       (book) =>
         book.title.toLowerCase().includes(query) ||
         book.author.toLowerCase().includes(query) ||
@@ -107,7 +119,7 @@ export default function Navbar() {
                     Non-fiction
                   </li>
                   <li className="p-3 text-lg text-black cursor-pointer">
-                    Children's Books
+                    Children&apos;s Books
                   </li>
                 </motion.ul>
               )}
@@ -179,6 +191,7 @@ export default function Navbar() {
                     View Profile
                   </button>
                 </Link>
+                {/* login logout */}
                 <button
                   onClick={handleLogout}
                   className="block px-4 py-2 text-red-600 hover:bg-gray-100 dark:hover:bg-gray-700"
