@@ -27,6 +27,18 @@ export default function CashOnDelivery() {
   const router = useRouter();
   const { clearCart } = useCart();
 
+  useEffect(() => {
+    const userString = localStorage.getItem("user");
+    if (userString) {
+      const user = JSON.parse(userString);
+      setFormData((prev) => ({
+        ...prev,
+        name: user.name || "",
+        email: user.email || "",
+      }));
+    }
+  }, []);
+
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
@@ -36,7 +48,6 @@ export default function CashOnDelivery() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Get cart data from localStorage
     const cart = localStorage.getItem("cart");
     if (!cart) {
       alert("Cart is empty.");
@@ -97,6 +108,7 @@ export default function CashOnDelivery() {
                 placeholder: "Your Full Name",
                 type: "text",
                 required: true,
+                disabled: true,
               },
               {
                 id: "phone",
@@ -110,6 +122,7 @@ export default function CashOnDelivery() {
                 icon: FaEnvelope,
                 placeholder: "Your Email Address",
                 type: "email",
+                disabled: true,
               },
               {
                 id: "street",
@@ -136,12 +149,17 @@ export default function CashOnDelivery() {
                 <input
                   id={id}
                   name={id}
+                  type={rest.type}
+                  placeholder={rest.placeholder}
+                  required={rest.required}
+                  disabled={rest.disabled || false}
+                  value={formData[id as keyof typeof formData] || ""}
                   onChange={handleChange}
                   className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                  {...rest}
                 />
               </div>
             ))}
+
             <div>
               <label
                 htmlFor="notes"
@@ -158,6 +176,7 @@ export default function CashOnDelivery() {
                 rows={3}
               ></textarea>
             </div>
+
             <button
               type="submit"
               className="bg-green-500 hover:bg-green-700 text-white font-bold py-3 px-6 rounded focus:outline-none focus:shadow-outline w-full"
