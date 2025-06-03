@@ -19,38 +19,12 @@ export default function Navbar() {
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [filteredBooks, setFilteredBooks] = useState<Book[]>([]);
+  const dropdownRef = useRef(null);
+
   interface User {
     name: string;
     role?: string;
-    // Add other user properties as needed
   }
-  const [user, setUser] = useState<User | null>(null); // Set user as User type or null
-  const dropdownRef = useRef(null);
-
-  useEffect(() => {
-    const storedUser = localStorage.getItem("user");
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
-    }
-  }, []);
-
-  console.log("User:", user);
-
-  const handleLogout = () => {
-    localStorage.removeItem("user");
-    setUser(null);
-  };
-
-  const toggleDarkMode = () => {
-    setIsDarkMode((prevMode) => !prevMode);
-    if (isDarkMode) {
-      document.documentElement.classList.remove("dark");
-      localStorage.setItem("darkMode", "true");
-    } else {
-      document.documentElement.classList.add("dark");
-      localStorage.setItem("darkMode", "false");
-    }
-  };
 
   interface Book {
     id: string | number;
@@ -60,11 +34,46 @@ export default function Navbar() {
     genres: string[];
   }
 
+  const [user, setUser] = useState<User | null>(null);
+
+  useEffect(() => {
+    const storedUser = localStorage.getItem("user");
+    if (storedUser) {
+      try {
+        const parsedUser = JSON.parse(storedUser);
+        if (parsedUser && typeof parsedUser.name === "string") {
+          setUser(parsedUser);
+        } else {
+          console.warn("Invalid user data in localStorage:", parsedUser);
+          setUser(null);
+        }
+      } catch (err) {
+        console.error("Failed to parse user data:", err);
+      }
+    }
+  }, []);
+
+  const handleLogout = () => {
+    localStorage.removeItem("user");
+    setUser(null);
+  };
+
+  const toggleDarkMode = () => {
+    setIsDarkMode((prev) => !prev);
+    if (isDarkMode) {
+      document.documentElement.classList.remove("dark");
+      localStorage.setItem("darkMode", "true");
+    } else {
+      document.documentElement.classList.add("dark");
+      localStorage.setItem("darkMode", "false");
+    }
+  };
+
   const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
     const query = event.target.value.toLowerCase();
     setSearchQuery(query);
 
-    if (query.trim() === "") {
+    if (!query.trim()) {
       setFilteredBooks([]);
       return;
     }
@@ -83,7 +92,7 @@ export default function Navbar() {
     <nav className="dark:bg-gray-800 shadow-md py-3 px-6 fixed top-0 w-full z-50 h-[72px]">
       <div className="flex justify-between items-center max-w-6xl mx-auto">
         {/* Logo */}
-        <Link href={"/"}>
+        <Link href="/">
           <Image
             src="/logo.png"
             alt="Book-US"
@@ -142,21 +151,21 @@ export default function Navbar() {
             className="absolute left-3 top-3 text-gray-500 dark:text-gray-400"
           />
           {searchQuery && filteredBooks.length > 0 && (
-            <ul className="absolute bg-white dark:bg-gray-800 shadow-lg rounded-md w-full mt-1">
+            <ul className="absolute bg-white dark:bg-gray-800 shadow-lg rounded-md w-full mt-1 z-50 max-h-[300px] overflow-y-auto">
               {filteredBooks.map((book) => (
                 <li
                   key={book.id}
-                  className="p-3 text-lg cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-700"
+                  className="flex items-center gap-2 p-2 cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-700"
                 >
+                  <Image
+                    src={book.image}
+                    alt={book.title}
+                    width={30}
+                    height={40}
+                    className="rounded-md shadow-sm"
+                  />
                   <Link href={`/book/${book.id}`}>
                     {book.title} - {book.author}
-                    <Image
-                      src={book.image}
-                      alt={book.title}
-                      width={30}
-                      height={40}
-                      className="rounded-md shadow-lg"
-                    />
                   </Link>
                 </li>
               ))}
@@ -164,9 +173,8 @@ export default function Navbar() {
           )}
         </div>
 
-        {/* Right Side: Auth & Cart */}
+        {/* Right Side: Cart & Auth */}
         <div className="flex items-center gap-4">
-          {/* Cart */}
           <Link href="/components/pages/cart" className="relative">
             <ShoppingBasket
               size={30}
@@ -183,7 +191,7 @@ export default function Navbar() {
           {user ? (
             <div className="relative group">
               <div className="bg-blue-600 text-white w-10 h-10 rounded-full flex items-center justify-center uppercase cursor-pointer">
-                {user.name[0]}
+                {user?.name?.[0]?.toUpperCase() || "U"}
               </div>
               <div className="absolute top-full right-0 bg-white dark:bg-gray-800 shadow-md rounded mt-2 hidden group-hover:block">
                 <Link href="/components/pages/userprofile">
@@ -191,15 +199,12 @@ export default function Navbar() {
                     View Profile
                   </button>
                 </Link>
-                {/* login logout */}
                 <button
                   onClick={handleLogout}
                   className="block px-4 py-2 text-red-600 hover:bg-gray-100 dark:hover:bg-gray-700"
                 >
                   Logout
                 </button>
-
-                {/* Role-based Navigation */}
                 {user.role === "admin" && (
                   <Link href="/components/Admin">
                     <button className="block px-4 py-2 text-blue-600 hover:bg-gray-100 dark:hover:bg-gray-700">
@@ -216,13 +221,11 @@ export default function Navbar() {
               </button>
             </Link>
           )}
-
-          {/* Currency */}
+{/* button */}
           <button className="border text-xl px-3 py-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700">
             NPR
           </button>
 
-          {/* Dark Mode */}
           <button onClick={toggleDarkMode} className="ml-4 p-2 rounded-full">
             {isDarkMode ? <SunIcon /> : <MoonIcon />}
           </button>
