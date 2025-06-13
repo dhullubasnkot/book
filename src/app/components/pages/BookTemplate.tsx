@@ -66,6 +66,7 @@ export default function BookTemplate({
               </p>
 
               {/* Add to Cart Button */}
+              {/* Add to Cart Button */}
               <button
                 onClick={() => addToCart(book)} // Add book to cart on click
                 disabled={book.stock === 0} // Disable if out of stock
